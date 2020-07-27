@@ -1,4 +1,4 @@
-# vue-dropdown-autocomplete
+# Vue.js dropdown component
 
 ## Project setup
 ```

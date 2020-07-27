@@ -2,6 +2,7 @@
   "name": "vue-dropdown-autocomplete",
   "version": "0.1.0",
   "private": true,
+  "author": "Dmytro Halimov",
   "scripts": {
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
