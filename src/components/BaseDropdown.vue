@@ -92,10 +92,10 @@ export default {
     },
     options: {
       type: Array,
-      required: true,
+      default: () => ([]),
     },
     value: {
-      type: String,
+      type: [String, Number, Boolean],
       default: null,
     },
     placeholder: {
