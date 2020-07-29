@@ -26,8 +26,10 @@
         :name="name"
         autocomplete="off"
         autocapitalize="none"
-        aria-expanded="false"
+        :aria-expanded="isOpen"
         aria-autocomplete="list"
+        aria-owns="base-dropdown-options"
+        role="combobox"
         spellcheck="false"
         @focus="openDropdown"
         @keydown.tab="closeDropdown"
@@ -42,9 +44,11 @@
         <path d="M16.003 18.626l7.081-7.081L25 13.46l-8.997 8.998-9.003-9 1.917-1.916z"/>
       </svg>
 
-      <ul v-show="isOpen" class="base-dropdown__options">
-        <li v-if="isLoading" class="base-dropdown__option">Loading...</li>
-        <li v-else-if="!hasFilteredOptions" class="base-dropdown__option">No options found</li>
+      <ul v-show="isOpen" class="base-dropdown__options" id="base-dropdown-options" role="listbox">
+        <li v-if="isLoading" class="base-dropdown__option" tabindex="-1">Loading...</li>
+        <li v-else-if="!hasFilteredOptions" class="base-dropdown__option" tabindex="-1">
+          No options found
+        </li>
         <li
           v-else
           v-for="(option, idx) in filteredOptions"
@@ -55,6 +59,8 @@
             'base-dropdown__option--highlighted': checkIfOptionHighlighted(idx),
           }"
           tabindex="-1"
+          role="option"
+          :aria-selected="checkIfOptionSelected(idx)"
           @click="selectOption(idx)"
           @mouseover="highlightOption(idx)"
         >
