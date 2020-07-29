@@ -48,7 +48,7 @@ filterable | Whether the options can be filtered by searching | boolean | true
 Method | Description | Params
 ------------ | ------------- | -------
 focus | Programmatically focus on dropdown component | -
-blur | Programmatically blur on dropdown component. It'll close hide opened options list | -
+blur | Programmatically blur on dropdown component. It'll hide opened options list | -
 
 ## Project setup
 ```
