@@ -8,6 +8,7 @@ A Vue.js custom dropdown component with autocomplete functionality.
 
 * [Usage](#usage)
 * [Props](#props)
+* [Methods](#methods)
 * [Project setup](#project-setup)
 * [Security](#security)
 * [Compiles and hot-reloads for development](#compiles-and-hot-reloads-for-development)
@@ -41,6 +42,13 @@ placeholder | The placeholder text for the input field | string | null
 disabled | Whether the field is disabled or not | boolean | false
 name | Native name attritbute | string | null
 filterable | Whether the options can be filtered by searching | boolean | true
+
+## Methods
+
+Method | Description | Params
+------------ | ------------- | -------
+focus | Programmatically focus on dropdown component | -
+blur | Programmatically blur on dropdown component. It'll close hide opened options list | -
 
 ## Project setup
 ```
