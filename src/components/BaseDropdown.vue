@@ -3,6 +3,7 @@
   <div
     ref="dropdownContainer"
     class="base-dropdown"
+    id="base-dropdown"
     @keydown.down="traverseDown"
     @keydown.up="traverseUp"
     @keydown.enter="selectHighlightedOption"
@@ -211,8 +212,10 @@ export default {
       this.closeDropdown();
     },
     selectHighlightedOption() {
-      this.selectOption(this.highlightedOptionIdx);
-      this.$refs.dropdownInput.blur();
+      if (this.highlightedOptionIdx || this.highlightedOptionIdx === 0) {
+        this.selectOption(this.highlightedOptionIdx);
+        this.$refs.dropdownInput.blur();
+      }
     },
     checkIfOptionSelected(index) {
       return this.selectedOption?.code === this.filteredOptions[index].code;
