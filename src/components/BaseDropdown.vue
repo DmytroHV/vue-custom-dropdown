@@ -4,9 +4,9 @@
     ref="dropdownContainer"
     class="base-dropdown"
     id="base-dropdown"
-    @keydown.down="traverseDown"
-    @keydown.up="traverseUp"
-    @keydown.enter="selectHighlightedOption"
+    @keydown.down="handleContainerArrowDownPress"
+    @keydown.up="handleContainerArrowUpPress"
+    @keydown.enter="handleContainerEnterKeydown"
   >
 
     <label v-if="label" for="base-dropdown-input" class="base-dropdown__label">
@@ -32,8 +32,8 @@
         aria-owns="base-dropdown-options"
         role="combobox"
         spellcheck="false"
-        @focus="openDropdown"
-        @keydown.tab="closeDropdown"
+        @focus="handleInputFocus"
+        @keydown.tab="handleInputTabKeydown"
       >
 
       <svg
@@ -62,8 +62,8 @@
           tabindex="-1"
           role="option"
           :aria-selected="checkIfOptionSelected(idx)"
-          @click="selectOption(idx)"
-          @mouseover="highlightOption(idx)"
+          @click="handleOptionClick(idx, $event)"
+          @mouseover="handleOptionMouseover(idx, $event)"
         >
           {{ option.label }}
         </li>
@@ -205,8 +205,8 @@ export default {
       this.isOpen = false;
       this.inputValue = this.selectedOption?.label || null;
     },
-    selectOption(index) {
-      this.selectedOption = this.filteredOptions[index];
+    selectOption(optionIndex) {
+      this.selectedOption = this.filteredOptions[optionIndex];
       this.inputValue = this.selectedOption.label;
       this.$emit('input', this.selectedOption.code);
       this.closeDropdown();
@@ -217,19 +217,19 @@ export default {
         this.$refs.dropdownInput.blur();
       }
     },
-    checkIfOptionSelected(index) {
-      return this.selectedOption?.code === this.filteredOptions[index].code;
+    checkIfOptionSelected(optionIndex) {
+      return this.selectedOption?.code === this.filteredOptions[optionIndex].code;
     },
-    checkIfOptionHighlighted(index) {
-      return this.highlightedOptionIdx === index;
+    checkIfOptionHighlighted(optionIndex) {
+      return this.highlightedOptionIdx === optionIndex;
     },
     documentClickListener(event) {
       if (!this.$refs.dropdownContainer.contains(event.target)) {
         this.closeDropdown();
       }
     },
-    highlightOption(index) {
-      this.highlightedOptionIdx = index;
+    highlightOption(optionIndex) {
+      this.highlightedOptionIdx = optionIndex;
     },
     traverseUp() {
       if (this.highlightedOptionIdx === 0) {
@@ -249,6 +249,31 @@ export default {
 
       this.highlightedOptionIdx += 1;
     },
+
+    // Event handlers
+    handleContainerArrowDownPress() {
+      this.traverseDown();
+    },
+    handleContainerArrowUpPress() {
+      this.traverseUp();
+    },
+    handleContainerEnterKeydown() {
+      this.selectHighlightedOption();
+    },
+    handleInputFocus() {
+      this.openDropdown();
+    },
+    handleInputTabKeydown() {
+      this.closeDropdown();
+    },
+    handleOptionClick(optionIndex) {
+      this.selectOption(optionIndex);
+    },
+    handleOptionMouseover(optionIndex) {
+      this.highlightOption(optionIndex);
+    },
+
+    // Input native methods to expose outside for usage within $ref
     focus() {
       this.$refs.dropdownInput.focus();
     },
