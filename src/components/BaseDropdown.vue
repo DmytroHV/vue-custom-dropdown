@@ -179,15 +179,11 @@ export default {
       immediate: true,
     },
     inputValue(newVal, oldVal) {
-      console.log(`Old value: ${sanitizeString(oldVal)}`);
-      console.log(`New value: ${sanitizeString(newVal)}`);
       if (!this.isOpen) {
-        console.log('prevented');
         return;
       }
 
       if (sanitizeString(oldVal) === sanitizeString(newVal)) {
-        console.log('prevented');
         return;
       }
 
@@ -197,7 +193,7 @@ export default {
   },
 
   methods: {
-    async processAutocomplete() {
+    processAutocomplete() {
       this.isTyping = false;
       this.isLoading = true;
 
