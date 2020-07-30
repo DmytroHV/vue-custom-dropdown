@@ -195,22 +195,26 @@ export default {
   methods: {
     processAutocomplete() {
       this.isTyping = false;
-      this.isLoading = true;
 
       if (this.queryMethod && this.asyncQuery) {
-        this.getFilteredOptionsAsync();
+        this.queryFilteredOptionsAsync();
         return;
       }
 
       if (this.queryMethod) {
-        this.filteredOptions = this.queryMethod();
+        this.filteredOptions = this.queryFilteredOptions();
         return;
       }
 
       this.filterOptionsInternally();
-      this.isLoading = false;
     },
-    async getFilteredOptionsAsync() {
+    queryFilteredOptions() {
+      this.isLoading = false;
+      this.filteredOptions = this.queryMethod();
+      this.isLoading = true;
+    },
+    async queryFilteredOptionsAsync() {
+      this.isLoading = true;
       try {
         this.filteredOptions = await this.queryMethod(this.inputValue);
       } catch (error) {
@@ -220,6 +224,8 @@ export default {
       }
     },
     filterOptionsInternally() {
+      this.isLoading = true;
+
       if (this.inputValue) {
         this.filteredOptions = this.options.filter(
           (option) => sanitizeString(option.label).indexOf(sanitizeString(this.inputValue)) > -1,
