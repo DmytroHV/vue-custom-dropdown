@@ -179,7 +179,15 @@ export default {
       immediate: true,
     },
     inputValue(newVal, oldVal) {
+      console.log(`Old value: ${sanitizeString(oldVal)}`);
+      console.log(`New value: ${sanitizeString(newVal)}`);
+      if (!this.isOpen) {
+        console.log('prevented');
+        return;
+      }
+
       if (sanitizeString(oldVal) === sanitizeString(newVal)) {
+        console.log('prevented');
         return;
       }
 
@@ -230,17 +238,19 @@ export default {
     },
     openDropdown() {
       this.isOpen = true;
-      this.inputValue = null;
+
+      if (this.selectedOption) {
+        this.filteredOptions = this.options;
+      }
     },
     closeDropdown() {
       this.isOpen = false;
       this.inputValue = this.selectedOption?.label || null;
     },
     selectOption(optionIndex) {
-      this.closeDropdown();
       this.selectedOption = this.filteredOptions[optionIndex];
-      this.inputValue = this.selectedOption.label;
       this.$emit('input', this.selectedOption.code);
+      this.closeDropdown();
     },
     selectHighlightedOption() {
       if (this.highlightedOptionIdx || this.highlightedOptionIdx === 0) {
