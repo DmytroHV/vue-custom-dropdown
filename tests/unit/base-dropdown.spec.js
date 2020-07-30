@@ -16,7 +16,7 @@ const options = [
   },
 ];
 const CSSSelector = {
-  Input: '#base-dropdown-input',
+  Input: '.base-dropdown__input',
   Option: '.base-dropdown__option',
   Label: '.base-dropdown__label',
 };

@@ -4,12 +4,12 @@
     ref="dropdownContainer"
     class="base-dropdown"
     id="base-dropdown"
-    @keydown.down="traverseDown"
-    @keydown.up="traverseUp"
-    @keydown.enter="selectHighlightedOption"
+    @keydown.down="handleContainerArrowDownPress"
+    @keydown.up="handleContainerArrowUpPress"
+    @keydown.enter="handleContainerEnterKeydown"
   >
 
-    <label v-if="label" for="base-dropdown-input" class="base-dropdown__label">
+    <label v-if="label" :for="uniqueInputId" class="base-dropdown__label">
       {{ label }}
     </label>
 
@@ -19,7 +19,7 @@
         ref="dropdownInput"
         v-model="inputValue"
         type="text"
-        id="base-dropdown-input"
+        :id="uniqueInputId"
         class="base-dropdown__input"
         :placeholder="placeholder"
         :disabled="disabled"
@@ -32,8 +32,8 @@
         aria-owns="base-dropdown-options"
         role="combobox"
         spellcheck="false"
-        @focus="openDropdown"
-        @keydown.tab="closeDropdown"
+        @focus="handleInputFocus"
+        @keydown.tab="handleInputTabKeydown"
       >
 
       <svg
@@ -46,7 +46,8 @@
       </svg>
 
       <ul v-show="isOpen" class="base-dropdown__options" id="base-dropdown-options" role="listbox">
-        <li v-if="isLoading" class="base-dropdown__option" tabindex="-1">Loading...</li>
+        <li v-if="isTyping" class="base-dropdown__option" tabindex="-1">Typing...</li>
+        <li v-else-if="isLoading" class="base-dropdown__option" tabindex="-1">Loading...</li>
         <li v-else-if="!hasFilteredOptions" class="base-dropdown__option" tabindex="-1">
           No options found
         </li>
@@ -62,8 +63,8 @@
           tabindex="-1"
           role="option"
           :aria-selected="checkIfOptionSelected(idx)"
-          @click="selectOption(idx)"
-          @mouseover="highlightOption(idx)"
+          @click="handleOptionClick(idx, $event)"
+          @mouseover="handleOptionMouseover(idx, $event)"
         >
           {{ option.label }}
         </li>
@@ -77,9 +78,8 @@
 
 <script>
 import { debounce } from 'debounce';
+import { nanoid } from 'nanoid';
 import { sanitizeString } from '../utils';
-
-const LARGE_ARRAY_LENGTH = 500;
 
 export default {
   name: 'base-dropdown',
@@ -115,16 +115,26 @@ export default {
       type: String,
       default: 'dropdown-input',
     },
+    queryMethod: {
+      type: Function,
+      default: null,
+    },
+    asyncQuery: {
+      type: Boolean,
+      default: false,
+    },
   },
 
   data() {
     return {
       inputValue: null,
+      uniqueInputId: null,
       isOpen: false,
       isLoading: false,
+      isTyping: false,
       selectedOption: null,
       filteredOptions: [],
-      highlightedOptionIdx: null,
+      highlightedOptionIdx: 0,
     };
   },
 
@@ -141,11 +151,12 @@ export default {
   },
 
   created() {
-    this.debouncedFilterOptions = debounce(this.filterOptions, 600);
+    this.debouncedProcessAutocomplete = debounce(this.processAutocomplete, 600);
   },
 
   mounted() {
     document.addEventListener('click', this.documentClickListener);
+    this.uniqueInputId = `dropdown-input-${nanoid()}`;
   },
 
   destroyed() {
@@ -168,23 +179,51 @@ export default {
       immediate: true,
     },
     inputValue(newVal, oldVal) {
-      if (oldVal === newVal) {
+      console.log(`Old value: ${sanitizeString(oldVal)}`);
+      console.log(`New value: ${sanitizeString(newVal)}`);
+      if (!this.isOpen) {
+        console.log('prevented');
         return;
       }
 
-      if (this.options.length >= LARGE_ARRAY_LENGTH) {
-        this.isLoading = true;
-        this.debouncedFilterOptions();
-
+      if (sanitizeString(oldVal) === sanitizeString(newVal)) {
+        console.log('prevented');
         return;
       }
 
-      this.filterOptions();
+      this.isTyping = true;
+      this.debouncedProcessAutocomplete();
     },
   },
 
   methods: {
-    filterOptions() {
+    async processAutocomplete() {
+      this.isTyping = false;
+      this.isLoading = true;
+
+      if (this.queryMethod && this.asyncQuery) {
+        this.getFilteredOptionsAsync();
+        return;
+      }
+
+      if (this.queryMethod) {
+        this.filteredOptions = this.queryMethod();
+        return;
+      }
+
+      this.filterOptionsInternally();
+      this.isLoading = false;
+    },
+    async getFilteredOptionsAsync() {
+      try {
+        this.filteredOptions = await this.queryMethod(this.inputValue);
+      } catch (error) {
+        this.filteredOptions = this.filterOptionsInternally();
+      } finally {
+        this.isLoading = false;
+      }
+    },
+    filterOptionsInternally() {
       if (this.inputValue) {
         this.filteredOptions = this.options.filter(
           (option) => sanitizeString(option.label).indexOf(sanitizeString(this.inputValue)) > -1,
@@ -199,15 +238,17 @@ export default {
     },
     openDropdown() {
       this.isOpen = true;
-      this.inputValue = null;
+
+      if (this.selectedOption) {
+        this.filteredOptions = this.options;
+      }
     },
     closeDropdown() {
       this.isOpen = false;
       this.inputValue = this.selectedOption?.label || null;
     },
-    selectOption(index) {
-      this.selectedOption = this.filteredOptions[index];
-      this.inputValue = this.selectedOption.label;
+    selectOption(optionIndex) {
+      this.selectedOption = this.filteredOptions[optionIndex];
       this.$emit('input', this.selectedOption.code);
       this.closeDropdown();
     },
@@ -217,19 +258,19 @@ export default {
         this.$refs.dropdownInput.blur();
       }
     },
-    checkIfOptionSelected(index) {
-      return this.selectedOption?.code === this.filteredOptions[index].code;
+    checkIfOptionSelected(optionIndex) {
+      return this.selectedOption?.code === this.filteredOptions[optionIndex].code;
     },
-    checkIfOptionHighlighted(index) {
-      return this.highlightedOptionIdx === index;
+    checkIfOptionHighlighted(optionIndex) {
+      return this.highlightedOptionIdx === optionIndex;
     },
     documentClickListener(event) {
       if (!this.$refs.dropdownContainer.contains(event.target)) {
         this.closeDropdown();
       }
     },
-    highlightOption(index) {
-      this.highlightedOptionIdx = index;
+    highlightOption(optionIndex) {
+      this.highlightedOptionIdx = optionIndex;
     },
     traverseUp() {
       if (this.highlightedOptionIdx === 0) {
@@ -249,6 +290,31 @@ export default {
 
       this.highlightedOptionIdx += 1;
     },
+
+    // Event handlers
+    handleContainerArrowDownPress() {
+      this.traverseDown();
+    },
+    handleContainerArrowUpPress() {
+      this.traverseUp();
+    },
+    handleContainerEnterKeydown() {
+      this.selectHighlightedOption();
+    },
+    handleInputFocus() {
+      this.openDropdown();
+    },
+    handleInputTabKeydown() {
+      this.closeDropdown();
+    },
+    handleOptionClick(optionIndex) {
+      this.selectOption(optionIndex);
+    },
+    handleOptionMouseover(optionIndex) {
+      this.highlightOption(optionIndex);
+    },
+
+    // Input native methods to expose outside for usage within $ref
     focus() {
       this.$refs.dropdownInput.focus();
     },
