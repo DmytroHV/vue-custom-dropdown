@@ -4,6 +4,8 @@
       v-model="selection"
       label="Countries"
       :options="options"
+      :asyncQuery="true"
+      :queryMethod="asyncFilterOptions"
       placeholder="Select a country"
     />
   </div>
@@ -12,17 +14,39 @@
 <script>
 import BaseDropdown from './components/BaseDropdown.vue';
 import countries from './data/countries.json';
+import { sanitizeString } from './utils/index';
 
 export default {
   name: 'app',
+
   components: {
     BaseDropdown,
   },
+
   data() {
     return {
       selection: '',
       options: countries,
     };
+  },
+
+  methods: {
+    filterOptions(input) {
+      if (input === '') {
+        return this.options;
+      }
+
+      return this.options.filter(
+        (option) => sanitizeString(option.label).indexOf(sanitizeString(input)) > -1,
+      );
+    },
+    asyncFilterOptions(input) {
+      return new Promise((resolve) => {
+        setTimeout(() => {
+          resolve(this.filterOptions(input));
+        }, 2000);
+      });
+    },
   },
 };
 </script>

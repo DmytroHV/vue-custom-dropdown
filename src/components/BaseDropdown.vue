@@ -46,7 +46,8 @@
       </svg>
 
       <ul v-show="isOpen" class="base-dropdown__options" id="base-dropdown-options" role="listbox">
-        <li v-if="isLoading" class="base-dropdown__option" tabindex="-1">Loading...</li>
+        <li v-if="isTyping" class="base-dropdown__option" tabindex="-1">Typing...</li>
+        <li v-else-if="isLoading" class="base-dropdown__option" tabindex="-1">Loading...</li>
         <li v-else-if="!hasFilteredOptions" class="base-dropdown__option" tabindex="-1">
           No options found
         </li>
@@ -79,8 +80,6 @@
 import { debounce } from 'debounce';
 import { nanoid } from 'nanoid';
 import { sanitizeString } from '../utils';
-
-const LARGE_ARRAY_LENGTH = 500;
 
 export default {
   name: 'base-dropdown',
@@ -116,6 +115,14 @@ export default {
       type: String,
       default: 'dropdown-input',
     },
+    queryMethod: {
+      type: Function,
+      default: null,
+    },
+    asyncQuery: {
+      type: Boolean,
+      default: false,
+    },
   },
 
   data() {
@@ -124,6 +131,7 @@ export default {
       uniqueInputId: null,
       isOpen: false,
       isLoading: false,
+      isTyping: false,
       selectedOption: null,
       filteredOptions: [],
       highlightedOptionIdx: 0,
@@ -143,7 +151,7 @@ export default {
   },
 
   created() {
-    this.debouncedFilterOptions = debounce(this.filterOptions, 600);
+    this.debouncedProcessAutocomplete = debounce(this.processAutocomplete, 600);
   },
 
   mounted() {
@@ -171,23 +179,43 @@ export default {
       immediate: true,
     },
     inputValue(newVal, oldVal) {
-      if (oldVal === newVal) {
+      if (sanitizeString(oldVal) === sanitizeString(newVal)) {
         return;
       }
 
-      if (this.options.length >= LARGE_ARRAY_LENGTH) {
-        this.isLoading = true;
-        this.debouncedFilterOptions();
-
-        return;
-      }
-
-      this.filterOptions();
+      this.isTyping = true;
+      this.debouncedProcessAutocomplete();
     },
   },
 
   methods: {
-    filterOptions() {
+    async processAutocomplete() {
+      this.isTyping = false;
+      this.isLoading = true;
+
+      if (this.queryMethod && this.asyncQuery) {
+        this.getFilteredOptionsAsync();
+        return;
+      }
+
+      if (this.queryMethod) {
+        this.filteredOptions = this.queryMethod();
+        return;
+      }
+
+      this.filterOptionsInternally();
+      this.isLoading = false;
+    },
+    async getFilteredOptionsAsync() {
+      try {
+        this.filteredOptions = await this.queryMethod(this.inputValue);
+      } catch (error) {
+        this.filteredOptions = this.filterOptionsInternally();
+      } finally {
+        this.isLoading = false;
+      }
+    },
+    filterOptionsInternally() {
       if (this.inputValue) {
         this.filteredOptions = this.options.filter(
           (option) => sanitizeString(option.label).indexOf(sanitizeString(this.inputValue)) > -1,
@@ -209,10 +237,10 @@ export default {
       this.inputValue = this.selectedOption?.label || null;
     },
     selectOption(optionIndex) {
+      this.closeDropdown();
       this.selectedOption = this.filteredOptions[optionIndex];
       this.inputValue = this.selectedOption.label;
       this.$emit('input', this.selectedOption.code);
-      this.closeDropdown();
     },
     selectHighlightedOption() {
       if (this.highlightedOptionIdx || this.highlightedOptionIdx === 0) {
