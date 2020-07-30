@@ -126,7 +126,7 @@ export default {
       isLoading: false,
       selectedOption: null,
       filteredOptions: [],
-      highlightedOptionIdx: null,
+      highlightedOptionIdx: 0,
     };
   },
 
