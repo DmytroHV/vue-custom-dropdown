@@ -10,13 +10,13 @@ A Vue.js custom dropdown component with autocomplete functionality.
 * [Props](#props)
 * [Methods](#methods)
 * [Project setup](#project-setup)
-* [Security](#security)
-* [Compiles and hot-reloads for development](#compiles-and-hot-reloads-for-development)
-* [Compiles and minifies for production](#compiles-and-minifies-for-production)
-* [Run your unit tests](#run-your-unit-tests)
-* [Run your end-to-end tests](#run-your-end-to-end-tests)
-* [Lints and fixes files](#lints-and-fixes-files)
-* [Customize configuration](#customize-configuration)
+  * [Security](#security)
+  * [Compiles and hot-reloads for development](#compiles-and-hot-reloads-for-development)
+  * [Compiles and minifies for production](#compiles-and-minifies-for-production)
+  * [Run your unit tests](#run-your-unit-tests)
+  * [Run your end-to-end tests](#run-your-end-to-end-tests)
+  * [Lints and fixes files](#lints-and-fixes-files)
+  * [Customize configuration](#customize-configuration)
 
 ## Usage
 
