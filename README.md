@@ -42,6 +42,8 @@ placeholder | The placeholder text for the input field | string | null
 disabled | Whether the field is disabled or not | boolean | false
 name | Native name attritbute | string | null
 filterable | Whether the options can be filtered by searching | boolean | true
+queryMethod | Function to query (filter) options. Called on input change. | function | null
+asyncQuery | Whether queryMethod is async or not. | boolean | false
 
 ## Methods
 
