@@ -9,7 +9,7 @@
     @keydown.enter="handleContainerEnterKeydown"
   >
 
-    <label v-if="label" for="base-dropdown-input" class="base-dropdown__label">
+    <label v-if="label" :for="uniqueInputId" class="base-dropdown__label">
       {{ label }}
     </label>
 
@@ -19,7 +19,7 @@
         ref="dropdownInput"
         v-model="inputValue"
         type="text"
-        id="base-dropdown-input"
+        :id="uniqueInputId"
         class="base-dropdown__input"
         :placeholder="placeholder"
         :disabled="disabled"
@@ -77,6 +77,7 @@
 
 <script>
 import { debounce } from 'debounce';
+import { nanoid } from 'nanoid';
 import { sanitizeString } from '../utils';
 
 const LARGE_ARRAY_LENGTH = 500;
@@ -120,6 +121,7 @@ export default {
   data() {
     return {
       inputValue: null,
+      uniqueInputId: null,
       isOpen: false,
       isLoading: false,
       selectedOption: null,
@@ -146,6 +148,7 @@ export default {
 
   mounted() {
     document.addEventListener('click', this.documentClickListener);
+    this.uniqueInputId = `dropdown-input-${nanoid()}`;
   },
 
   destroyed() {
