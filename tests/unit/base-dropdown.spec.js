@@ -1,5 +1,6 @@
 import { shallowMount } from '@vue/test-utils';
 import BaseDropdown from '@/components/BaseDropdown.vue';
+import { sanitizeString } from '../../src/utils';
 
 const options = [
   {
@@ -21,7 +22,23 @@ const CSSSelector = {
   Label: '.base-dropdown__label',
 };
 
+const methods = {
+  queryMethodAsync: (input) => {
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        resolve(options.filter(
+          (option) => sanitizeString(option.label).indexOf(sanitizeString(input)) > -1,
+        ));
+      }, 2000);
+    });
+  },
+};
+
 describe('BaseDropdown.vue', () => {
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
   it('should open the list of options on focus', () => {
     const wrapper = shallowMount(BaseDropdown, {
       propsData: { options },
@@ -92,17 +109,17 @@ describe('BaseDropdown.vue', () => {
     expect(wrapper.emitted('input').length).toBe(1);
   });
 
-  it('should clear the input when open the list of options', () => {
-    const bindedValue = options[0].code;
+  it('should preserve selected value when open the list of options', () => {
+    const selectedOption = options[0];
 
     const wrapper = shallowMount(BaseDropdown, {
-      propsData: { options, value: bindedValue },
+      propsData: { options, value: selectedOption.code },
     });
 
     const input = wrapper.find(CSSSelector.Input);
     input.trigger('focus');
 
-    expect(wrapper.vm.inputValue).toBe(null);
+    expect(wrapper.vm.inputValue).toBe(selectedOption.label);
   });
 
   it('should render provided label', () => {
@@ -142,5 +159,20 @@ describe('BaseDropdown.vue', () => {
     });
 
     expect(wrapper.find(CSSSelector.Input).element.readOnly).toBe(true);
+  });
+
+  it('should call provided queryMethod', () => {
+    const queryMethodMock = jest.spyOn(methods, 'queryMethodAsync');
+    const query = 'rain';
+
+    const wrapper = shallowMount(BaseDropdown, {
+      propsData: { options, asyncQuery: true, queryMethod: queryMethodMock },
+    });
+
+    wrapper.vm.inputValue = query;
+    wrapper.vm.processAutocomplete();
+
+    expect(queryMethodMock).toHaveBeenCalledTimes(1);
+    expect(queryMethodMock).toHaveBeenCalledWith(query);
   });
 });

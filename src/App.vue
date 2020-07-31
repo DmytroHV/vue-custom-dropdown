@@ -25,7 +25,7 @@ export default {
 
   data() {
     return {
-      selection: '',
+      selection: 'BE',
       options: countries,
     };
   },
