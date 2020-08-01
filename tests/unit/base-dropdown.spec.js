@@ -1,6 +1,7 @@
 import { shallowMount } from '@vue/test-utils';
 import BaseDropdown from '@/components/BaseDropdown.vue';
 import { sanitizeString } from '../../src/utils';
+import { CSSTestSelector } from '../utils';
 
 const options = [
   {
@@ -16,22 +17,15 @@ const options = [
     label: 'Ukraine',
   },
 ];
-const CSSSelector = {
-  Input: '.base-dropdown__input',
-  Option: '.base-dropdown__option',
-  Label: '.base-dropdown__label',
-};
 
 const methods = {
-  queryMethodAsync: (input) => {
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        resolve(options.filter(
-          (option) => sanitizeString(option.label).indexOf(sanitizeString(input)) > -1,
-        ));
-      }, 2000);
-    });
-  },
+  queryMethodAsync: (input) => new Promise((resolve) => {
+    setTimeout(() => {
+      resolve(options.filter(
+        (option) => sanitizeString(option.label).indexOf(sanitizeString(input)) > -1,
+      ));
+    }, 2000);
+  }),
 };
 
 describe('BaseDropdown.vue', () => {
@@ -45,7 +39,7 @@ describe('BaseDropdown.vue', () => {
     });
 
     expect(wrapper.vm.isOpen).toBe(false);
-    wrapper.find(CSSSelector.Input).trigger('focus');
+    wrapper.find(CSSTestSelector.Input).trigger('focus');
     expect(wrapper.vm.isOpen).toBe(true);
   });
 
@@ -54,7 +48,7 @@ describe('BaseDropdown.vue', () => {
       propsData: { options },
     });
 
-    const input = wrapper.find(CSSSelector.Input);
+    const input = wrapper.find(CSSTestSelector.Input);
 
     input.trigger('focus');
     expect(wrapper.vm.isOpen).toBe(true);
@@ -82,7 +76,7 @@ describe('BaseDropdown.vue', () => {
     });
 
     wrapper.vm.isOpen = true;
-    wrapper.find(CSSSelector.Option).trigger('click');
+    wrapper.find(CSSTestSelector.Option).trigger('click');
 
     expect(wrapper.vm.isOpen).toBe(false);
     expect(wrapper.vm.selectedOption).toMatchObject(country);
@@ -116,7 +110,7 @@ describe('BaseDropdown.vue', () => {
       propsData: { options, value: selectedOption.code },
     });
 
-    const input = wrapper.find(CSSSelector.Input);
+    const input = wrapper.find(CSSTestSelector.Input);
     input.trigger('focus');
 
     expect(wrapper.vm.inputValue).toBe(selectedOption.label);
@@ -129,7 +123,7 @@ describe('BaseDropdown.vue', () => {
       propsData: { options, label },
     });
 
-    const labelElement = wrapper.find(CSSSelector.Label);
+    const labelElement = wrapper.find(CSSTestSelector.Label);
 
     expect(labelElement.exists()).toBe(true);
     expect(labelElement.text()).toBe(label);
@@ -142,7 +136,7 @@ describe('BaseDropdown.vue', () => {
       propsData: { options, placeholder },
     });
 
-    expect(wrapper.find(CSSSelector.Input).element.placeholder).toBe(placeholder);
+    expect(wrapper.find(CSSTestSelector.Input).element.placeholder).toBe(placeholder);
   });
 
   it('should disable input if prop provided', () => {
@@ -150,7 +144,7 @@ describe('BaseDropdown.vue', () => {
       propsData: { options, disabled: true },
     });
 
-    expect(wrapper.find(CSSSelector.Input).element.disabled).toBe(true);
+    expect(wrapper.find(CSSTestSelector.Input).element.disabled).toBe(true);
   });
 
   it('should disable autocomplete feature if filterable prop set to false', () => {
@@ -158,7 +152,7 @@ describe('BaseDropdown.vue', () => {
       propsData: { options, filterable: false },
     });
 
-    expect(wrapper.find(CSSSelector.Input).element.readOnly).toBe(true);
+    expect(wrapper.find(CSSTestSelector.Input).element.readOnly).toBe(true);
   });
 
   it('should call provided queryMethod', () => {

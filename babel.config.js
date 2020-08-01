@@ -1,5 +1,3 @@
-module.exports = {
-  presets: [
-    '@vue/cli-plugin-babel/preset',
-  ],
-};
+module.exports = process.env.CYPRESS_ENV
+  ? {}
+  : { presets: ['@vue/babel-preset-app'] };

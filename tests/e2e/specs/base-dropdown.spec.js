@@ -1,28 +1,32 @@
 // https://docs.cypress.io/api/introduction/api.html
+import { CSSTestSelector } from '../../utils';
+import countries from '../../../src/data/countries.json';
 
 describe('BaseDropdown component', () => {
-  it('Should be able to select a value', () => {
+  beforeEach(() => {
     cy.visit('/');
+  });
 
-    cy.get('[data-test="base-dropdown-input"]')
+  it('Should be able to select a value', () => {
+    cy.get(CSSTestSelector.Input)
       .focus();
 
-    cy.get('[data-test="base-dropdown-option"]:first')
+    cy.get(CSSTestSelector.Option)
+      .first()
       .click();
 
-    cy.get('[data-test="base-dropdown-input"]')
-      .should('have.value', 'Afghanistan');
+    cy.get(CSSTestSelector.Input)
+      .should('have.value', countries[0].label);
 
-    cy.get('[data-test="base-dropdown-options"]')
+    cy.get(CSSTestSelector.OptionsList)
       .should('not.be.visible');
   });
 
   it('Should be able to select a value within autocomplete', () => {
     const inputValue = 'rain';
+    const matchedOptions = countries.filter((country) => country.label.indexOf(inputValue) !== -1);
 
-    cy.visit('/');
-
-    cy.get('[data-test="base-dropdown-input"]')
+    cy.get(CSSTestSelector.Input)
       .focus()
       .type(inputValue);
 
@@ -31,45 +35,44 @@ describe('BaseDropdown component', () => {
     cy.contains('Loading...')
       .should('not.be.visible');
 
-    cy.get('[data-test="base-dropdown-option"]')
-      .should('have.length', 2)
+    cy.get(CSSTestSelector.Option)
+      .should('have.length', matchedOptions.length)
       .each(($el) => {
         expect($el).to.contain(inputValue);
-      });
-
-    cy.get('[data-test="base-dropdown-option"]:first')
+      })
+      .first()
       .click();
 
-    cy.get('[data-test="base-dropdown-input"]')
-      .should('have.value', 'Bahrain');
+    cy.get(CSSTestSelector.Input)
+      .should('have.value', matchedOptions[0].label);
   });
 
   it('Should be able to edit selected option', () => {
-    cy.visit('/');
+    const firstOptionValue = countries[0].label;
 
-    cy.get('[data-test="base-dropdown-input"]')
+    cy.get(CSSTestSelector.Input)
       .focus();
 
-    cy.get('[data-test="base-dropdown-option"]:first')
+    cy.get(CSSTestSelector.Option)
+      .first()
       .click();
 
-    cy.get('[data-test="base-dropdown-input"]')
-      .should('have.value', 'Afghanistan')
+    cy.get(CSSTestSelector.Input)
+      .should('have.value', firstOptionValue)
       .focus()
       .type('sss')
-      .should('have.value', 'Afghanistansss');
+      .should('have.value', `${firstOptionValue}sss`);
   });
 
   it('Should not be able to select a not existing value', () => {
-    cy.visit('/');
-
-    cy.get('[data-test="base-dropdown-input"]')
+    cy.get(CSSTestSelector.Input)
       .focus();
 
-    cy.get('[data-test="base-dropdown-option"]:first')
+    cy.get(CSSTestSelector.Option)
+      .first()
       .click();
 
-    cy.get('[data-test="base-dropdown-input"]')
+    cy.get(CSSTestSelector.Input)
       .focus()
       .clear()
       .type('fake-option');

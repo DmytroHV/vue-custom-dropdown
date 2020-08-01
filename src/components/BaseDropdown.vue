@@ -3,7 +3,7 @@
   <div
     ref="dropdownContainer"
     class="base-dropdown"
-    data-test="base-dropdown-container"
+    :data-test="testSelectors.Container"
     id="base-dropdown"
     @keydown.down="handleContainerArrowDownPress"
     @keydown.up="handleContainerArrowUpPress"
@@ -14,7 +14,7 @@
       v-if="label"
       :for="uniqueInputId"
       class="base-dropdown__label"
-      data-test="base-dropdown-label"
+      :data-test="testSelectors.Label"
     >
       {{ label }}
     </label>
@@ -27,7 +27,7 @@
         type="text"
         :id="uniqueInputId"
         class="base-dropdown__input"
-        data-test="base-dropdown-input"
+        :data-test="testSelectors.Input"
         :placeholder="placeholder"
         :disabled="disabled"
         :readonly="!filterable"
@@ -55,7 +55,7 @@
       <ul
         v-show="isOpen"
         class="base-dropdown__options"
-        data-test="base-dropdown-options"
+        :data-test="testSelectors.OptionsList"
         id="base-dropdown-options"
         role="listbox"
       >
@@ -63,7 +63,7 @@
           v-if="isTyping"
           class="base-dropdown__option"
           tabindex="-1"
-          data-test="base-dropdown-option"
+          :data-test="testSelectors.Option"
         >
           Typing...
         </li>
@@ -71,7 +71,7 @@
           v-else-if="isLoading"
           class="base-dropdown__option"
           tabindex="-1"
-          data-test="base-dropdown-option"
+          :data-test="testSelectors.Option"
         >
           Loading...
         </li>
@@ -79,7 +79,7 @@
           v-else-if="!hasFilteredOptions"
           class="base-dropdown__option"
           tabindex="-1"
-          data-test="base-dropdown-option"
+          :data-test="testSelectors.Option"
         >
           No options found
         </li>
@@ -92,7 +92,7 @@
             'base-dropdown__option--selected': checkIfOptionSelected(idx),
             'base-dropdown__option--highlighted': checkIfOptionHighlighted(idx),
           }"
-          data-test="base-dropdown-option"
+          :data-test="testSelectors.Option"
           tabindex="-1"
           role="option"
           :aria-selected="checkIfOptionSelected(idx)"
@@ -113,6 +113,7 @@
 import { debounce } from 'debounce';
 import { nanoid } from 'nanoid';
 import { sanitizeString } from '../utils';
+import { CSSDataTestElement } from '../../tests/utils';
 
 export default {
   name: 'base-dropdown',
@@ -168,6 +169,7 @@ export default {
       selectedOption: null,
       filteredOptions: [],
       highlightedOptionIdx: 0,
+      testSelectors: CSSDataTestElement,
     };
   },
 
