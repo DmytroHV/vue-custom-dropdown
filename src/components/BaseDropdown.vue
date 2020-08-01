@@ -3,13 +3,19 @@
   <div
     ref="dropdownContainer"
     class="base-dropdown"
+    data-test="base-dropdown-container"
     id="base-dropdown"
     @keydown.down="handleContainerArrowDownPress"
     @keydown.up="handleContainerArrowUpPress"
     @keydown.enter="handleContainerEnterKeydown"
   >
 
-    <label v-if="label" :for="uniqueInputId" class="base-dropdown__label">
+    <label
+      v-if="label"
+      :for="uniqueInputId"
+      class="base-dropdown__label"
+      data-test="base-dropdown-label"
+    >
       {{ label }}
     </label>
 
@@ -21,6 +27,7 @@
         type="text"
         :id="uniqueInputId"
         class="base-dropdown__input"
+        data-test="base-dropdown-input"
         :placeholder="placeholder"
         :disabled="disabled"
         :readonly="!filterable"
@@ -45,10 +52,35 @@
         <path d="M16.003 18.626l7.081-7.081L25 13.46l-8.997 8.998-9.003-9 1.917-1.916z"/>
       </svg>
 
-      <ul v-show="isOpen" class="base-dropdown__options" id="base-dropdown-options" role="listbox">
-        <li v-if="isTyping" class="base-dropdown__option" tabindex="-1">Typing...</li>
-        <li v-else-if="isLoading" class="base-dropdown__option" tabindex="-1">Loading...</li>
-        <li v-else-if="!hasFilteredOptions" class="base-dropdown__option" tabindex="-1">
+      <ul
+        v-show="isOpen"
+        class="base-dropdown__options"
+        data-test="base-dropdown-options"
+        id="base-dropdown-options"
+        role="listbox"
+      >
+        <li
+          v-if="isTyping"
+          class="base-dropdown__option"
+          tabindex="-1"
+          data-test="base-dropdown-option"
+        >
+          Typing...
+        </li>
+        <li
+          v-else-if="isLoading"
+          class="base-dropdown__option"
+          tabindex="-1"
+          data-test="base-dropdown-option"
+        >
+          Loading...
+        </li>
+        <li
+          v-else-if="!hasFilteredOptions"
+          class="base-dropdown__option"
+          tabindex="-1"
+          data-test="base-dropdown-option"
+        >
           No options found
         </li>
         <li
@@ -60,6 +92,7 @@
             'base-dropdown__option--selected': checkIfOptionSelected(idx),
             'base-dropdown__option--highlighted': checkIfOptionHighlighted(idx),
           }"
+          data-test="base-dropdown-option"
           tabindex="-1"
           role="option"
           :aria-selected="checkIfOptionSelected(idx)"
